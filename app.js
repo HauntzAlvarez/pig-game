@@ -1,81 +1,80 @@
-'use strict';
+const express = require('express');
+const app = express();
+const server = require('http').createServer(app);
+const io = require('socket.io')(server, {cors: {origin : "*"}});
 
-// DOM Elements
-const scoresEL = [document.querySelector('#score--0'), document.querySelector('#score--1')];
-const currentScoresEL = [document.querySelector('#current--0'), document.querySelector('#current--1')];
-const diceEl = document.querySelector('.dice');
-const rollDiceBtn = document.querySelector('.btn.btn--roll');
-const holdScoreBtn = document.querySelector('.btn.btn--hold');
-const newGameBtn = document.querySelector('.btn.btn--new'); 
+app.use(express.static('public'))
 
-// Variables
+app.get('/pigGame', (req, res) => {
+    res.sendFile(__dirname + '/public/index.html');
+})
+
+
+server.listen(3000, () => {
+    console.log("Server running...");
+})
+
+
+var player1 = null;
+var player2 = null;
+
 let activePlayer = 0;
 let currentScore = 0;
 const scoresArray = [0, 0];
 
-// Initialize pig game
-scoresEL[0].textContent = 0;
-scoresEL[1].textContent = 0;
-diceEl.classList.add('hidden');
 
-// Initialize Event handlers
-rollDiceBtn.addEventListener('click', rollDice);
-holdScoreBtn.addEventListener('click', holdScore);
-newGameBtn.addEventListener('click', newGame); 
+io.on('connection', (socket) => {
 
-// Functions
-function rollDice() {
-  const diceNumber = Math.floor(Math.random() * 6) + 1;
-  showDice(diceNumber);
+    //console.log(socket.id);
 
-  if (diceNumber !== 1) {
-    currentScore += diceNumber;
-    currentScoresEL[activePlayer].textContent = currentScore;
-  } else {
-    switchActivePlayer();
-  }
-}
+    socket.emit('getId', socket.id);
 
-function showDice(number) {
-  diceEl.classList.remove('hidden');
-  diceEl.src = `dice-${number}.png`;
-}
+    socket.on('playerSelect', (player, id) => {
+        if(player1 == null || player2 == null) {
+            if(player == 0) {
+                player1 = id;
+                socket.broadcast.emit('playerRegister', 0, id);
+            }
+            if(player == 1) {
+                player2 = id;
+                socket.broadcast.emit('playerRegister', 1, id);
+            }
+        }
 
-function switchActivePlayer() {
-  currentScore = 0;
-  currentScoresEL[activePlayer].textContent = currentScore;
-  activePlayer = 1 - activePlayer; 
-  document.querySelectorAll('.player').forEach((player, index) => {
-    player.classList.toggle('player--active', index === activePlayer);
-  });
-}
+        if(player1 != null && player2 != null) {
+            console.log("Player 1: " + player1);
+            console.log("Player 2: " + player2);
+            activePlayer = 0;
+            io.emit('startGame', activePlayer);
+        }
+    })
 
-function hideDice() {
-  diceEl.classList.add('hidden');
-}
 
-function holdScore() {
-  scoresArray[activePlayer] += currentScore;
-  scoresEL[activePlayer].textContent = scoresArray[activePlayer];
-  switchActivePlayer();
-}
+    socket.on('rollDice', () => {
+        const diceNumber = Math.floor(Math.random() * 6) + 1;
+        io.emit('showdice', diceNumber);
 
-function newGame() {
-    scoresArray[0] = 0;
-    scoresArray[1] = 0;
-    currentScore = 0;
-    activePlayer = 0;
-  
-    // Reset the DOM to initial values
-    scoresEL[0].textContent = 0;
-    scoresEL[1].textContent = 0;
-    currentScoresEL[0].textContent = 0;
-    currentScoresEL[1].textContent = 0;
-    diceEl.classList.add('hidden');
-  
-    document.querySelectorAll('.player').forEach((player, index) => {
-      player.classList.remove('player--winner');
-      player.classList.toggle('player--active', index === activePlayer);
+        if (diceNumber !== 1) {
+            currentScore += diceNumber;
+            io.emit('currentScore', currentScore, activePlayer);
+        }
+        else {
+            currentScore = 0;
+            io.emit('currentScore', currentScore, activePlayer);
+            activePlayer = 1 - activePlayer;
+            io.emit('endTurn', activePlayer);
+            //switchActivePlayer();
+        }
     });
-  }
-  
+
+    socket.on('holdScore', () => {
+        scoresArray[activePlayer] += currentScore;
+        io.emit('playerScore', scoresArray[activePlayer], activePlayer);
+
+        currentScore = 0;
+        io.emit('currentScore', currentScore, activePlayer);
+        activePlayer = 1 - activePlayer;
+        io.emit('endTurn', activePlayer);
+    })
+
+})
