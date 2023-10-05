@@ -39,7 +39,8 @@
       
     </main>
 
-    <div class="selection-overlay">
+    <div class="overlay" id="selection-overlay">
+      <span class="wait-player-label">WAITING FOR OTHER PLAYER...</span>
       <div class="selection-container">
             <span class="select-player-label">SELECT PLAYER</span>
             <div class="player-selection">
@@ -53,6 +54,16 @@
               </div>
             </div>
       </div>
+    </div>
+
+    <div class="overlay" id="player-left-overlay">
+      <span class="label">OTHER PLAYER HAS LEFT THE GAME</span>
+      <span class="refresh-label">PLEASE REFRESH THE PAGE</span>
+    </div>
+
+    <div class="overlay" id="session-overlay">
+      <span class="label">PLEASE WAIT. THERE IS A GAME IN SESSION</span>
+      <!--span class="refresh-label">PLEASE REFRESH THE PAGE</span-->
     </div>
 
     <script src="script.js"></script>

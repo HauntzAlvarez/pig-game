@@ -175,7 +175,12 @@ main {
 
 /* Overlay */
 
-.selection-overlay {
+#player-left-overlay, 
+#session-overlay {
+  display: none;
+}
+
+.overlay {
   height: 100vh;
   width: 100vw;
   z-index: 100;
@@ -198,8 +203,9 @@ main {
 .selection-container {
   min-height: 300px;
   /*border: 1px solid blue ;*/
-
   text-align: center;
+
+  display: none;
 }
 
 .player-selection {
@@ -245,7 +251,19 @@ main {
   color: white;
 }
 
-.select-player-label {
+.wait-player-label {
+  font-size: 50px;
+  color: white;
+  display: block;
+}
+
+.refresh-label {
+  font-size: 35px;
+  color: white;
+}
+
+.select-player-label, 
+.label {
   font-size: 50px;
   color: white;
 }
@@ -254,3 +272,5 @@ main {
   font-size: 30px;
   color: white;
 }
+
+

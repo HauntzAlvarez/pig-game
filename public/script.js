@@ -34,6 +34,24 @@ socket.on('getId', (messageId) => {
   playerid = messageId;
 })
 
+socket.on('enableSelection', ()=> {
+  document.querySelector('#selection-overlay').style.display = 'flex';
+  document.querySelector('#player-left-overlay').style.display = 'none';
+  document.querySelector('#session-overlay').style.display = 'none';
+
+  document.querySelector('.wait-player-label').style.display = 'none';
+  document.querySelector('.selection-container').style.display = 'block';
+})
+
+socket.on('waitPlayer', () => {
+  document.querySelector('#selection-overlay').style.display = 'flex';
+  document.querySelector('#player-left-overlay').style.display = 'none';
+  document.querySelector('#session-overlay').style.display = 'none';
+
+  document.querySelector('.wait-player-label').style.display = 'block';
+  document.querySelector('.selection-container').style.display = 'none';
+})
+
 
 //disable player button when selected
 socket.on('playerRegister', (player, id) => {
@@ -50,7 +68,7 @@ socket.on('playerRegister', (player, id) => {
 //remove overlay and start game
 socket.on('startGame', (turn) => {
   console.log("Start Game");
-  document.querySelector('.selection-overlay').style.display = 'none';
+  document.querySelector('#selection-overlay').style.display = 'none';
 
   //disable buttons
   playerTurn(false);
@@ -94,6 +112,24 @@ socket.on('connection', () => {
   console.log("Hi");
 })
 
+socket.on('clearPlayerSpan', () => {
+  document.getElementById("playerOneSpan").textContent = 'Test player id';
+  playerOneButton.disabled = false;
+  document.getElementById("playerTwoSpan").textContent = 'Test player id';
+  playerTwoButton.disabled = false;
+})
+
+socket.on('gameOnSession', () => {
+  document.querySelector('#selection-overlay').style.display = 'none';
+  document.querySelector('#player-left-overlay').style.display = 'none';
+  document.querySelector('#session-overlay').style.display = 'flex';
+})
+
+socket.on('playerLeft', () => {
+  document.querySelector('#selection-overlay').style.display = 'none';
+  document.querySelector('#session-overlay').style.display = 'none';
+  document.querySelector('#player-left-overlay').style.display = 'flex';
+})
 
 // Initialize pig game
 scoresEL[0].textContent = 0;
